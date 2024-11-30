@@ -1,0 +1,160 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+class Product {
+    private String name;
+    private double price;
+    private String category;
+
+    public Product(String name, double price, String category) {
+        this.name = name;
+        this.price = price;
+        this.category = category;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{name='" + name + "', price=" + price + ", category='" + category + "'}";
+    }
+}
+
+class Electronics extends Product {
+    public Electronics(String name, double price) {
+        super(name, price, "Electronics");
+    }
+}
+
+class Clothing extends Product {
+    public Clothing(String name, double price) {
+        super(name, price, "Clothing");
+    }
+}
+
+class Grocery extends Product {
+    public Grocery(String name, double price) {
+        super(name, price, "Grocery");
+    }
+}
+
+class User {
+    private String name;
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+class Customer extends User {
+    private List<Product> cart = new ArrayList<>();
+
+    public Customer(String name) {
+        super(name);
+    }
+
+    public void addToCart(Product product) {
+        cart.add(product);
+    }
+
+    public List<Product> getCart() {
+        return cart;
+    }
+
+    public double calculateCartTotal() {
+        return cart.stream()
+                   .mapToDouble(Product::getPrice)
+                   .sum();
+    }
+}
+
+class Admin extends User {
+    public Admin(String name) {
+        super(name);
+    }
+
+    public void manageProduct() {
+        System.out.println("Admin " + getName() + " manages products.");
+    }
+}
+
+class Order {
+    private List<Product> products;
+    private double total;
+
+    public Order(List<Product> products) {
+        this.products = products;
+        this.total = calculateTotal();
+    }
+
+    private double calculateTotal() {
+        return products.stream()
+                       .mapToDouble(Product::getPrice)
+                       .sum();
+    }
+
+    public double applyTax(double taxRate) {
+        return total * taxRate;
+    }
+
+    public double calculateShippingFee() {
+        return total > 50 ? 0 : 5;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{products=" + products + ", total=" + total + "}";
+    }
+}
+
+public class EcommercePlatform {
+    public static void main(String[] args) {
+        List<Product> products = Arrays.asList(
+            new Electronics("Laptop", 1200),
+            new Electronics("Headphones", 200),
+            new Clothing("T-shirt", 25),
+            new Grocery("Apple", 1.5),
+            new Grocery("Milk", 3.0)
+        );
+
+        Customer customer = new Customer("Alice");
+        customer.addToCart(products.get(0)); 
+        customer.addToCart(products.get(3)); 
+
+        System.out.println("Customer Cart: " + customer.getCart());
+        System.out.println("Cart Total: $" + customer.calculateCartTotal());
+
+        Order order = new Order(customer.getCart());
+        System.out.println("Order Details: " + order);
+        System.out.println("Order with Tax: $" + (order.applyTax(1.1))); 
+        System.out.println("Shipping Fee: $" + order.calculateShippingFee());
+
+        Admin admin = new Admin("Bob");
+        admin.manageProduct();
+
+        System.out.println("\n--- Product Search and Sorting ---");
+        System.out.println("All Electronics: " +
+            products.stream()
+                    .filter(product -> product.getCategory().equals("Electronics"))
+                    .collect(Collectors.toList()));
+
+        System.out.println("Sorted Products by Price: " +
+            products.stream()
+                    .sorted(Comparator.comparingDouble(Product::getPrice))
+                    .collect(Collectors.toList()));
+    }
+}
